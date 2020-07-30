@@ -30,6 +30,7 @@ function! golangci_lint#call(bang, args) abort
         \.then({ v -> v.stdout })
         \.then({ v -> filter(v, { -> v:val[:0] =~# '\S' }) })
         \.then({ v -> setqflist([], ' ', extend({'lines': sort(v)}, what)) })
+        \.then({ -> execute('doautocmd <nomodeline> QuickFixCmdPost golangci-lint') })
         \.catch({ v -> s:echoerr(v) })
         \.finally({ -> s:Lambda.let(s:, 'source', v:null) })
 endfunction
