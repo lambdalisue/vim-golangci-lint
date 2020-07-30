@@ -29,7 +29,7 @@ function! golangci_lint#call(bang, args) abort
   call s:Process.start(args, { 'token': s:source.token })
         \.then({ v -> v.stdout })
         \.then({ v -> filter(v, { -> v:val[:0] =~# '\S' }) })
-        \.then({ v -> setqflist([], ' ', extend({'lines': v}, what)) })
+        \.then({ v -> setqflist([], ' ', extend({'lines': sort(v)}, what)) })
         \.catch({ v -> s:echoerr(v) })
         \.finally({ -> s:Lambda.let(s:, 'source', v:null) })
 endfunction
