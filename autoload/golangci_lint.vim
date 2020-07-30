@@ -27,13 +27,16 @@ function! golangci_lint#call(bang, args) abort
         \ 'title': join(args),
         \ 'efm': g:golangci_lint#errorformat,
         \}
-  call s:Process.start(args, { 'token': s:source.token })
-        \.then({ v -> !empty(v.stderr) ? s:Promise.reject(v.stderr) : s:Promise.resolve(v.stdout) })
-        \.then({ v -> filter(v, { -> v:val[:0] =~# '\S' }) })
-        \.then({ v -> setqflist([], ' ', extend({'lines': sort(v)}, what)) })
-        \.then({ -> execute('doautocmd <nomodeline> QuickFixCmdPost golangci-lint') })
+  let rs = s:Process.start(args, { 'token': s:source.token })
         \.catch({ e -> s:echoerr(e) })
         \.finally({ -> s:Lambda.let(s:, 'source', v:null) })
+  call rs.then({ v -> v.stderr })
+        \.then({ v -> filter(v, { -> !empty(v:val) }) })
+        \.then({ v -> s:echoerr(v) })
+  call rs.then({ v -> v.stdout })
+        \.then({ v -> filter(v, { -> !empty(v:val) }) })
+        \.then({ v -> setqflist([], ' ', extend({'lines': sort(v)}, what)) })
+        \.then({ -> execute('doautocmd <nomodeline> QuickFixCmdPost golangci-lint') })
 endfunction
 
 function! s:echoerr(messages) abort
