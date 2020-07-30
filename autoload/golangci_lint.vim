@@ -1,7 +1,7 @@
 let s:Lambda = vital#golangci_lint#import('Lambda')
 let s:Process = vital#golangci_lint#import('Async.Promise.Process')
 let s:CancellationTokenSource = vital#golangci_lint#import('Async.CancellationTokenSource')
-let s:errorformat = '%W%f:%l:%c: %m,%-C%.%#'
+let s:errorformat = '%W%f:%l:%c: %m,%W%f:%l: %m,%-G%.%#'
 let s:source = v:null
 
 function! golangci_lint#call(bang, args) abort
