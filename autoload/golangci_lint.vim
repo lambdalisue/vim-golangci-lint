@@ -1,4 +1,5 @@
 let s:Lambda = vital#golangci_lint#import('Lambda')
+let s:Promise = vital#golangci_lint#import('Async.Promise')
 let s:Process = vital#golangci_lint#import('Async.Promise.Process')
 let s:CancellationTokenSource = vital#golangci_lint#import('Async.CancellationTokenSource')
 let s:errorformat = '%W%f:%l:%c: %m,%W%f:%l: %m,%-G%.%#'
@@ -27,17 +28,19 @@ function! golangci_lint#call(bang, args) abort
         \ 'efm': g:golangci_lint#errorformat,
         \}
   call s:Process.start(args, { 'token': s:source.token })
-        \.then({ v -> v.stdout })
+        \.then({ v -> !empty(v.stderr) ? s:Promise.reject(v.stderr) : s:Promise.resolve(v.stdout) })
         \.then({ v -> filter(v, { -> v:val[:0] =~# '\S' }) })
         \.then({ v -> setqflist([], ' ', extend({'lines': sort(v)}, what)) })
         \.then({ -> execute('doautocmd <nomodeline> QuickFixCmdPost golangci-lint') })
-        \.catch({ v -> s:echoerr(v) })
+        \.catch({ e -> s:echoerr(e) })
         \.finally({ -> s:Lambda.let(s:, 'source', v:null) })
 endfunction
 
-function! s:echoerr(m) abort
+function! s:echoerr(messages) abort
   echohl ErrorMsg
-  echomsg string(a:m)
+  for m in a:messages
+    echomsg printf('[golangci-lint] %s', m)
+  endfor
   echohl None
 endfunction
 
