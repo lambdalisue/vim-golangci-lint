@@ -22,7 +22,6 @@ function! golangci_lint#call(bang, args) abort
         \ '--out-format', 'line-number',
         \]
   let args = args + a:args
-  echomsg string(args)
   let what = {
         \ 'title': join(args),
         \ 'efm': g:golangci_lint#errorformat,
